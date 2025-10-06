@@ -1,0 +1,19 @@
+Question 1: What is this line : "dev": "node --watch index.mjs" in the package.json file?
+
+	-> It means that the file "watches" for changes and does live changes to the webpage.
+
+Question 2: why is the server code in the src folder? The server uses the express, fs and path modules with nodeJS. Where can you find the documentation of these modules?
+
+	-> From reddit : "inside /src. src stands for "source" and should contain all of the raw application code before any minification, obfuscation, compilation or transpilation." -> also it's for security, you dont send source code to the browser ofc :o
+
+	-> https://expressjs.com/ ### https://nodejs.org/api/fs.html ### https://nodejs.org/api/path.html
+	-> Also mozilla dev pages
+
+Question 3: why are the preset files in the public/presets folder?
+
+	-> I guess that that's because they're not html css or js files ? but they're in public because we want them accessible.
+
+Question 4: what is the purpose of the tests folder?
+
+The tests folder is used to store unit tests and integration tests for the application. These tests help ensure that the code behaves as expected and allows for easier maintenance and refactoring in the future.
+

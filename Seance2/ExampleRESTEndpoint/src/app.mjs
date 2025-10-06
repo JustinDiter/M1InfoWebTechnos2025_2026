@@ -87,7 +87,45 @@ app.get("/api/presets", async (req, res, next) => {
   try {
     // TODO
     // First get the list of preset files and return it as a JSON array of objects
-    
+    const files = await listPresetFiles();
+
+    // Read all preset JSON files
+    const presets = await Promise.all(
+      files.map(async (f) => {
+        const data = await readJSON(path.join(DATA_DIR, f));
+        return { ...data, name: f.replace(/\.json$/,"") };
+      })
+    );
+
+    // Filtering
+    let filtered = presets;
+
+    // Text search (q)
+    if (req.query.q) {
+      const q = req.query.q.toLowerCase();
+      filtered = filtered.filter(
+        p =>
+          p.name.toLowerCase().includes(q) ||
+          (p.type && p.type.toLowerCase().includes(q)) ||
+          (p.description && p.description.toLowerCase().includes(q))
+      );
+    }
+
+    // Type filter
+    if (req.query.type) {
+      const type = req.query.type.toLowerCase();
+      filtered = filtered.filter(
+        p => p.type && p.type.toLowerCase() === type
+      );
+    }
+
+    // Factory filter
+    if (req.query.factory === "true") {
+      filtered = filtered.filter(p => p.isFactoryPresets === true);
+    }
+
+    res.json(filtered);
+
     // In a second step, implement filtering based on optional parameters passed in the
     // URI after the ? character. These parameters are in the req.query object.
     // req.query contains optional parameters: q (text search), type (filter by type), factory (true/false)
@@ -103,7 +141,7 @@ app.get("/api/presets", async (req, res, next) => {
     
     // Return the filtered list. the.json method sets the Content-Type header and stringifies the object
     //res.json(items);
-    res.json(`THIS FEATURE IS TO BE DONE. You should return the list of JSON preset files located in the folder ${DATA_DIR}as a JSON array of objects`);
+    // res.json(`THIS FEATURE IS TO BE DONE. You should return the list of JSON preset files located in the folder ${DATA_DIR}as a JSON array of objects`);
   } catch (e) { next(e); }
 });
 
@@ -112,9 +150,16 @@ app.get("/api/presets", async (req, res, next) => {
 app.get("/api/presets/:name", async (req, res, next) => {
   const presetName = req.params.name;
   try {
+    const file = safePresetPath(presetName);
 
+    if (!(await fileExists(file))) {
+      return res.status(404).json({ error: "Preset not found" });
+    }
+
+    const preset = await readJSON(file);
+    res.json(preset);
     // TODO
-    res.json(`THIS FEATURE IS TO BE DONE. This should return the content of the preset JSON file ${DATA_DIR}/${req.params.name} as a JSON object`);
+    //res.json(`THIS FEATURE IS TO BE DONE. This should return the content of the preset JSON file ${DATA_DIR}/${req.params.name} as a JSON object`);
     //res.json(await readJSON(file));
   } catch (e) { next(e); }
 });
