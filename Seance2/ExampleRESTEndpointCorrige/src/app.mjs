@@ -2,6 +2,8 @@
 import express from "express";
 import fs from "fs/promises";
 import path from "path";
+import { fileURLToPath } from "node:url";
+
 import crypto from "crypto";
 import multer from "multer";
 
@@ -37,16 +39,29 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // limit files to 10MB
 });
 
-// PUBLIC_DIR default for static files -> ../public
-export let PUBLIC_DIR =  process.env.DATA_DIR || new URL("../public", import.meta.url).pathname;
-// directory for storing presets (can be set with DATA_DIR env var), useful for deployment with docker
-export let DATA_DIR = process.env.DATA_DIR ||PUBLIC_DIR + "/presets";
-// clean path names
-PUBLIC_DIR = decodeURIComponent(PUBLIC_DIR);
-DATA_DIR = decodeURIComponent(DATA_DIR);
+// --------- Cross-platform paths (Mac/Linux/Windows) ---------
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
 
-// Defines where static files are located, for example the file data/presets/Basic Kit/kick.wav
+// PUBLIC_DIR: env var wins, else ../public (absolute path)
+export const PUBLIC_DIR = process.env.PUBLIC_DIR
+  ? path.resolve(process.env.PUBLIC_DIR)
+  : path.resolve(__dirname, "../public");
+
+// DATA_DIR: env var wins, else <PUBLIC_DIR>/presets
+export const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(PUBLIC_DIR, "presets");
+
+// No decodeURIComponent needed anymore; these are file system paths
+
+
+// Defines where static files are located, for example the file 
+// data/presets/Basic Kit/kick.wav
 // will be accessible at http://localhost:3000/presets/Basic%20Kit/kick.wav
+// The file PUBLIC_DIR/index.html will be served at http://localhost:3000/ or 
+// http://localhost:3000/index.html
+// app.use should use a path that works on unix and windows
 app.use(express.static(PUBLIC_DIR));
 
 // Ensure data dir exists at startup (best-effort)

@@ -16,3 +16,4 @@ npm run dev
 # for running unit tests
 npm run tests
 # For trying a simple html/javascript client : http://localhost:3000# M1InfoWebTechnos2025_2026
+# The ci.yml file is a github action files example you could put at the root of your own nodejs/express project in .github/workflows, that will automatize unit test checks at each git push or PR (Pull Request). Maybe adapt the name of the node version you use to avoid warnings.

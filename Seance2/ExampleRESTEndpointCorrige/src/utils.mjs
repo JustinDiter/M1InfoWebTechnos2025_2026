@@ -31,8 +31,14 @@ export const writeJSON = async (filePath, data) => fs.writeFile(filePath, JSON.s
 export const listPresetFiles = async () => {
   console.log("Reading DATA_DIR:", DATA_DIR);
 
-  const items = await fs.readdir(DATA_DIR).catch(() => []);
+  // if DATA_DIR does not exist yet, readdir will throw
+  // an error, so we catch it and return an empty array
+  const items = await fs.readdir(DATA_DIR).catch((err) => {
+    console.error("Error reading DATA_DIR:", err);
+    return [];
+  });
   console.log(items);
+  // filter only .json files from the list of files
   return items.filter((f) => f.endsWith(".json"));
 };
 // Validate a preset object, returns an array of error messages (empty if valid)

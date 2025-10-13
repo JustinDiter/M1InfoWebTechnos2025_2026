@@ -1,0 +1,24 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Load a sound sample using fetch, decode it and play it using Web Audio</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- type="module" is necessary if the main.js file is using import / export (aka ES/JS modules)
+     Try removing it and see what happens in the debug console! -->
+    <script src="js/main.js" type="module"></script>
+    <script src="wamhost.js"></script>
+</head>
+
+<body>
+    <h1>Load a set of sounds with Promise.all and fetch</H1>
+    <p>The buttons below are created dynamically based on the loaded sounds.</p>
+    <div id="buttonsContainer"></div>
+    
+    <h1>Here is a more complete sampler (as a Web WAM plugin)</h1>
+    <p>Note: WAM = Web Audio Module, the name of the plugin standard for audio processing in web applications.</p>
+    <p>WAMs = "VST for the Web!"</p>
+    <h2>Select a preset in the menu and click on the buttons...</h2>
+    <div id="wamsampler-container"></div>
+</body>
+
+</html>
