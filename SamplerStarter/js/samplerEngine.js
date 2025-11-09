@@ -101,8 +101,12 @@ export default class SamplerEngine {
   }
   
   // ... (updateTrim, updateSoundSetting, getBuffer, getSettings are unchanged)
-  updateTrim(index, startPixel, endPixel) { /* ... */ }
-  updateSoundSetting(index, setting, value) { /* ... */ }
+  updateTrim(index, startPixel, endPixel) {
+    if (this.soundSettings[index]) {
+      this.soundSettings[index].trimStart = startPixel;
+      this.soundSettings[index].trimEnd = endPixel;
+    }
+  }
   getBuffer(index) { return this.audioBuffers[index]; }
   getSettings(index) { return this.soundSettings[index]; }
 
