@@ -1,9 +1,13 @@
+
 import express from "express";  
 import fs from "node:fs/promises";
 import path from "path";
 import { fileURLToPath } from "node:url";
+import cors from "cors";
+
 
 const app = express();
+app.use(cors());
 
 // Static files are located in the public folder
 const __filename = fileURLToPath(import.meta.url);

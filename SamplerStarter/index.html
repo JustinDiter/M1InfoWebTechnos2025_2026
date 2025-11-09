@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My MIDI Sampler</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <h1>My Sampler</h1>
+
+  <div id="controls-container">
+    
+    <div class="preset-controls">
+      <select id="preset-menu" class="preset-menu"></select>
+      <button id="delete-preset-button" class="control-button-delete">DELETE</button>
+    </div>
+    
+    <div class="recording-controls">
+      <button id="record-button" class="control-button-record">RECORD</button>
+      <button id="stop-button" class="control-button-stop" disabled>STOP</button>
+      <audio id="audio-player" controls></audio>
+    </div>
+
+    <div id="waveform-container">
+      <canvas id="waveform-canvas" width="500" height="100"></canvas>
+      <canvas id="trimbars-canvas" width="500" height="100"></canvas>
+    </div>
+  </div>
+
+  
+
+  <div id="pads-container">
+    </div>
+
+  <script src="js/main.js" type="module"></script>
+</body>
+</html>

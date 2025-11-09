@@ -23,26 +23,34 @@ const soundURLs = [
     
 let decodedSounds = [];
 
+function getFileNameFromURL(url) {
+  return url.split('/').pop().split('.')[0].replace(/_/g, ' ');
+}
+
 window.onload = async function init() {
-    ctx = new AudioContext();
+  ctx = new AudioContext();
 
-
-    // load and decode the sounds using Promise.all
-    // we create an array of promises
-    let promises = soundURLs.map(url => loadAndDecodeSound(url, ctx));
-
-    // we wait for all the promises to be resolved
+  // load and decode the sounds using Promise.all
+  // we create an array of promises
+  try {
+    const promises = soundURLs.map(url => loadAndDecodeSound(url, ctx));
     decodedSounds = await Promise.all(promises);
-  
+    // use decodedSounds safely from here
+    console.log("All sounds decoded:", decodedSounds.length);
     // now we create a button for each sound
     let buttonsContainer = document.querySelector("#buttonsContainer");
 
     decodedSounds.forEach((decodedSound, index) => {
         let button = document.createElement("button");
-        button.textContent = `Play sound ${index + 1}`;
+        const soundName = getFileNameFromURL(soundURLs[index]);
+        button.textContent = soundName;
         button.onclick = function() {
             playSound(ctx, decodedSound, 0, decodedSound.duration);
         };
         buttonsContainer.appendChild(button);
     });
+  } catch (err) {
+    console.error("Failed to load/decode one or more sounds", err);
+    // handle UI fallback (disable play buttons, show message, etc.)
+  }
 }

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import crypto from "crypto";
 import multer from "multer";
+import cors from 'cors';
 
 // import utility functions from utils.mjs
 import {
@@ -14,6 +15,9 @@ import {
 } from "./utils.mjs";
 
 export const app = express();
+const port = 3000;
+
+app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 
 // configure multer for file uploads
@@ -75,20 +79,23 @@ await fs.mkdir(DATA_DIR, { recursive: true }).catch(() => {});
 // Simple health check endpoint, this is generally the first endpoint to test
 app.get("/api/health", (_req, res) => res.json({ ok: true, now: new Date().toISOString() }));
 
-// GET list/search
 app.get("/api/presets", async (req, res, next) => {
   try {
-    // req.query contains optional parameters: q (text search), type (filter by type), factory (true/false)
-    // that appear in the URI like that : /api/presets?q=kick&type=drum&factory=true
-    // the javascript syntax in the following like uses the JavaScript "destructuring" assignment
+    // req.query contains optional parameters...
     const { q, type, factory } = req.query;
-    const files = await listPresetFiles();
+    const files = await listPresetFiles(); // e.g., ["808.json", "basic-kit.json"]
 
-    // Promise.all is used to read all JSON files in parallel and in a non-blocking way
-    // This improves performance when dealing with multiple files
-    // The syntax of Promise.all is a bit tricky: we create an array of promises
-    // by mapping each filename to a readJSON call, and then we wait for all of them to complete
-    let items = await Promise.all(files.map((f) => readJSON(path.join(DATA_DIR, f))));
+    // Create an array of promises that read the file AND add the key
+    const itemPromises = files.map(async (f) => {
+      const key = f.replace(".json", ""); // e.g., "808"
+      const presetData = await readJSON(path.join(DATA_DIR, f));
+      return {
+        ...presetData,
+        key: key // Add the key (folder name) to the object
+      };
+    });
+    
+    let items = await Promise.all(itemPromises);
 
     // Apply filters
     if (type) {
@@ -103,9 +110,11 @@ app.get("/api/presets", async (req, res, next) => {
       const needle = String(q).toLowerCase();
       items = items.filter((p) => {
         const inName = p?.name?.toLowerCase().includes(needle);
-        const inSamples = Array.isArray(p?.samples) && p.samples.some((s) =>
-          s && (s.name?.toLowerCase().includes(needle) || s.url?.toLowerCase().includes(needle))
+          // --- FIX IS HERE ---
+        const inSamples = Array.isArray(p?.sounds) && p.sounds.some((s) => 
+          s && (s.name?.toLowerCase().includes(needle) || s.file?.toLowerCase().includes(needle))
         );
+          // --- END FIX ---
         return inName || inSamples;
       });
     }

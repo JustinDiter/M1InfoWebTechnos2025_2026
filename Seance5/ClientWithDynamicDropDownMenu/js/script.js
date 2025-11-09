@@ -85,19 +85,52 @@ function buildPresetMenuWithGroups() {
   }
 }
 
-function loadPresetSoundFiles(index) {
-  // URIS are like http://localhost:3000/presets/808/Kick%20808X.wav
-  const BASE_PRESET_URI = "http://localhost:3000/presets";
 
-  // build the URIs of the sound files for this preset
+function loadPresetSoundFiles(index) {
+  const BASE_PRESET_URI = "http://localhost:3000/presets";
   const soundFileURIs = presets[index].samples.map(sample => {
     return encodeURI(`${BASE_PRESET_URI}/${sample.url}`);
   });
+  const sampleNames = presets[index].samples.map(sample => sample.name || sample.url.split('/').pop());
 
-  console.log("Sound file URIs for preset " + presets[index].name + " : ", soundFileURIs);
+  // Display PLAY buttons
+  const btnContainer = document.getElementById('sampleButtons');
+  btnContainer.innerHTML = '';
+  soundFileURIs.forEach((uri, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = `Play ${sampleNames[i]}`;
+    btn.onclick = () => playAndDrawWaveform(uri);
+    btnContainer.appendChild(btn);
+  });
+}
 
-  // We now have an array of sound file URIs
-  // You can use them to load and play the sounds as needed
+async function playAndDrawWaveform(url) {
+  const audioContext = window._audioContext || (window._audioContext = new (window.AudioContext || window.webkitAudioContext)());
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  const source = audioContext.createBufferSource();
+  source.buffer = audioBuffer;
+  source.connect(audioContext.destination);
+  source.start();
+  drawWaveform(audioBuffer);
+}
+
+function drawWaveform(audioBuffer) {
+  const canvas = document.getElementById('waveform');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const data = audioBuffer.getChannelData(0);
+  const step = Math.ceil(data.length / canvas.width);
+  ctx.beginPath();
+  for (let i = 0; i < canvas.width; i++) {
+    const min = Math.min(...data.slice(i * step, (i + 1) * step));
+    const max = Math.max(...data.slice(i * step, (i + 1) * step));
+    ctx.moveTo(i, (1 + min) * canvas.height / 2);
+    ctx.lineTo(i, (1 + max) * canvas.height / 2);
+  }
+  ctx.strokeStyle = '#0074D9';
+  ctx.stroke();
 }
 
 function start() {
